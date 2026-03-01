@@ -83,7 +83,7 @@ export default function CopilotDashboard() {
         <main className="flex-1 flex flex-col items-center justify-center px-6 py-12">
           <div className="max-w-3xl w-full text-center mb-12">
             <div className="flex items-center justify-center mx-auto mb-6">
-              <CoinLogo size={80} />
+              <CoinLogo size={120} />
             </div>
 
             <h1 className="text-4xl font-serif text-ws-text mb-4 tracking-tight">

@@ -1,0 +1,192 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    border-color: #E8E4DD;
+  }
+  body {
+    @apply bg-ws-bg text-ws-text;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom scrollbar — light theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D4D0C8;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B8B4AC;
+}
+
+/* Chat message animation */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-enter {
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+/* Smooth streaming message growth */
+.chat-message-bubble {
+  min-height: 40px;
+  transition: all 0.15s ease-out;
+}
+
+/* Stable scroll anchoring */
+.chat-scroll-container {
+  overflow-anchor: auto;
+}
+
+/* Typing indicator */
+@keyframes typingDot {
+  0%, 60%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.typing-dot {
+  animation: typingDot 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Pulse glow for active module */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(10, 123, 90, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(10, 123, 90, 0);
+  }
+}
+
+.pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+/* Coin float animation */
+@keyframes coinFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.coin-float {
+  animation: coinFloat 3s ease-in-out infinite;
+}
+
+/* Coin shine sweep */
+@keyframes coinShine {
+  0% {
+    filter: brightness(1) drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+  }
+  50% {
+    filter: brightness(1.15) drop-shadow(0 6px 12px rgba(0,0,0,0.15));
+  }
+  100% {
+    filter: brightness(1) drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+  }
+}
+
+.coin-shine {
+  animation: coinShine 3s ease-in-out infinite;
+}
+
+/* Markdown styling in chat */
+.chat-markdown h1,
+.chat-markdown h2,
+.chat-markdown h3 {
+  @apply font-semibold mt-3 mb-1 text-ws-text;
+}
+
+.chat-markdown h1 { @apply text-lg; }
+.chat-markdown h2 { @apply text-base; }
+.chat-markdown h3 { @apply text-sm; }
+
+.chat-markdown p {
+  @apply mb-2 leading-relaxed;
+}
+
+.chat-markdown ul, .chat-markdown ol {
+  @apply ml-4 mb-2 space-y-1;
+}
+
+.chat-markdown ul { @apply list-disc; }
+.chat-markdown ol { @apply list-decimal; }
+
+.chat-markdown li {
+  @apply text-sm leading-relaxed;
+}
+
+.chat-markdown code {
+  @apply bg-ws-bg-alt px-1.5 py-0.5 rounded text-xs font-mono text-ws-text;
+}
+
+.chat-markdown pre {
+  @apply bg-ws-bg-alt p-3 rounded-lg my-2 overflow-x-auto;
+}
+
+.chat-markdown pre code {
+  @apply bg-transparent p-0;
+}
+
+.chat-markdown strong {
+  @apply font-semibold text-ws-text;
+}
+
+.chat-markdown blockquote {
+  @apply border-l-2 border-ws-green pl-3 my-2 italic text-ws-text-secondary;
+}
+
+.chat-markdown hr {
+  @apply border-ws-border my-3;
+}
+
+.chat-markdown table {
+  @apply w-full my-2 text-sm;
+}
+
+.chat-markdown th {
+  @apply text-left p-2 border-b border-ws-border font-semibold text-ws-text;
+}
+
+.chat-markdown td {
+  @apply p-2 border-b border-ws-border;
+}

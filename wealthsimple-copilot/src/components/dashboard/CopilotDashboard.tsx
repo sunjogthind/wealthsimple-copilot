@@ -5,10 +5,9 @@ import Header from '../layout/Header';
 import Sidebar from '../layout/Sidebar';
 import ChatInterface from '../chat/ChatInterface';
 import CSVUpload from '../upload/CSVUpload';
-import PortfolioSummary from './PortfolioSummary';
 import ModuleCards from './ModuleCards';
-import TradeAnalysis from '../trading/TradeAnalysis';
-import TaxSummary from '../tax/TaxSummary';
+import TradingDashboard from './TradingDashboard';
+import TaxDashboard from './TaxDashboard';
 import { ModuleType, AnalyzeResponse } from '@/types/agent';
 import { ParsedTrade } from '@/types/trade';
 import { Sparkles } from 'lucide-react';
@@ -156,27 +155,30 @@ export default function CopilotDashboard() {
             )}
           </div>
 
-          {/* Right panel — analysis results */}
+          {/* Right panel — module-specific dashboard */}
           {analysisResult && !showUpload && (
             <aside className="w-80 border-l border-ws-border bg-white overflow-y-auto p-4">
-              <PortfolioSummary summary={analysisResult.summary} />
-
-              {analysisResult.biases.length > 0 && (
-                <div className="mt-6">
-                  <TradeAnalysis
-                    biases={analysisResult.biases}
-                    insights={analysisResult.insights}
-                  />
-                </div>
+              {activeModule === 'trading-coach' && (
+                <TradingDashboard
+                  summary={analysisResult.summary}
+                  biases={analysisResult.biases}
+                  insights={analysisResult.insights}
+                />
               )}
-
-              {analysisResult.taxSummary && analysisResult.taxOpportunities && (
-                <div className="mt-6">
-                  <TaxSummary
-                    taxSummary={analysisResult.taxSummary}
-                    harvestCandidates={analysisResult.taxOpportunities}
-                  />
-                </div>
+              
+              {activeModule === 'tax-optimizer' && analysisResult.taxSummary && analysisResult.taxOpportunities && (
+                <TaxDashboard
+                  taxSummary={analysisResult.taxSummary}
+                  harvestCandidates={analysisResult.taxOpportunities}
+                />
+              )}
+              
+              {!activeModule && (
+                <TradingDashboard
+                  summary={analysisResult.summary}
+                  biases={analysisResult.biases}
+                  insights={analysisResult.insights}
+                />
               )}
             </aside>
           )}

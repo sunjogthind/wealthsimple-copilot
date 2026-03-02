@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { TrendingUp, Calculator, ArrowRightLeft, HelpCircle, Lock } from 'lucide-react';
 import { ModuleType } from '@/types/agent';
 import { MODULE_CONFIGS } from '@/lib/utils/constants';
@@ -18,8 +19,28 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export default function Sidebar({ activeModule, onModuleClick, hasData }: SidebarProps) {
+  const [showComingSoonToast, setShowComingSoonToast] = useState(false);
+
+  const handleModuleClick = (moduleId: ModuleType, isComingSoon: boolean) => {
+    if (isComingSoon) {
+      setShowComingSoonToast(true);
+      setTimeout(() => setShowComingSoonToast(false), 3000);
+    } else {
+      onModuleClick(moduleId);
+    }
+  };
+
   return (
-    <aside className="w-64 border-r border-ws-border bg-white flex flex-col h-full">
+    <aside className="w-64 border-r border-ws-border bg-white flex flex-col h-full relative">
+      {/* Coming Soon Toast */}
+      {showComingSoonToast && (
+        <div className="absolute top-4 left-4 right-4 bg-blue-50 border border-blue-200 rounded-lg p-3 shadow-lg z-50 animate-slideDown">
+          <p className="text-xs text-blue-800 font-medium">
+            Coming soon — this module is under development.
+          </p>
+        </div>
+      )}
+
       <div className="p-4">
         <h2 className="text-xs font-semibold text-ws-text-muted uppercase tracking-wider mb-3">
           Modules
@@ -29,18 +50,16 @@ export default function Sidebar({ activeModule, onModuleClick, hasData }: Sideba
             const Icon = ICON_MAP[module.icon] || HelpCircle;
             const isActive = activeModule === module.id;
             const isComingSoon = module.status === 'coming-soon';
-            const isDisabled = isComingSoon;
 
             return (
               <button
                 key={module.id}
-                onClick={() => !isDisabled && onModuleClick(module.id)}
-                disabled={isDisabled}
+                onClick={() => handleModuleClick(module.id, isComingSoon)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
                   isActive
                     ? 'bg-ws-green-light text-ws-green border border-ws-green/20'
-                    : isDisabled
-                    ? 'text-ws-text-muted cursor-not-allowed opacity-50'
+                    : isComingSoon
+                    ? 'text-ws-text-muted cursor-pointer opacity-50 hover:opacity-70'
                     : 'text-ws-text-secondary hover:text-ws-text hover:bg-ws-bg-alt'
                 }`}
               >

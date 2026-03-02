@@ -60,6 +60,38 @@
   overflow-anchor: auto;
 }
 
+/* Dashboard panel transitions */
+@keyframes dashboardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-panel {
+  animation: dashboardFadeIn 0.3s ease-out;
+}
+
+/* Toast slide down animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.2s ease-out;
+}
+
 /* Typing indicator */
 @keyframes typingDot {
   0%, 60%, 100% {

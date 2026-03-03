@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { Upload, FileText, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { Upload, FileText, AlertCircle, CheckCircle2, Loader2, FlaskConical } from 'lucide-react';
 import { parseCSV, CSVParseResult } from '@/lib/parsers/csv-parser';
 import { ParsedTrade } from '@/types/trade';
+import { SAMPLE_PORTFOLIO_TRADES } from '@/lib/data/sample-portfolio';
 
 interface CSVUploadProps {
   onUploadComplete: (trades: ParsedTrade[]) => void;
@@ -168,6 +169,22 @@ export default function CSVUpload({ onUploadComplete, compact = false }: CSVUplo
             </div>
           </div>
         )}
+      </div>
+
+      {/* Demo mode button */}
+      <div className="mt-5 text-center">
+        <div className="flex items-center gap-3 justify-center mb-2">
+          <div className="h-px bg-ws-border flex-1" />
+          <span className="text-xs text-ws-text-muted">or</span>
+          <div className="h-px bg-ws-border flex-1" />
+        </div>
+        <button
+          onClick={() => onUploadComplete(SAMPLE_PORTFOLIO_TRADES)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 border border-ws-border bg-ws-bg hover:border-ws-green hover:bg-ws-green-light text-ws-text-secondary hover:text-ws-green text-sm font-medium rounded-xl transition-all"
+        >
+          <FlaskConical className="w-4 h-4" />
+          Try with sample portfolio — no CSV required
+        </button>
       </div>
     </div>
   );

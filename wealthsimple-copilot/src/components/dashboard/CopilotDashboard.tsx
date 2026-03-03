@@ -2,82 +2,70 @@
 
 import { useState, useCallback } from 'react';
 import Header from '../layout/Header';
-import Sidebar from '../layout/Sidebar';
-import ChatInterface from '../chat/ChatInterface';
 import CSVUpload from '../upload/CSVUpload';
-import ModuleCards from './ModuleCards';
-import TradingDashboard from './TradingDashboard';
-import TaxDashboard from './TaxDashboard';
-import { ModuleType, AnalyzeResponse } from '@/types/agent';
+import PortfolioSummary from './PortfolioSummary';
+import CommitteeView from '../committee/CommitteeView';
 import { ParsedTrade } from '@/types/trade';
-import { Sparkles } from 'lucide-react';
+import { analyzePortfolio } from '@/lib/analysis/portfolio';
+import { detectBiases } from '@/lib/analysis/behaviors';
+import { PortfolioSummary as PortfolioSummaryType, BehavioralBias } from '@/types/portfolio';
+import { AlertTriangle, Sparkles } from 'lucide-react';
 import CoinLogo from '../ui/CoinLogo';
 
-type AppView = 'landing' | 'chat';
+type AppView = 'landing' | 'app';
+
+function SeverityBadge({ severity }: { severity: BehavioralBias['severity'] }) {
+  const colors = {
+    high: 'bg-ws-red-light text-ws-red',
+    medium: 'bg-ws-yellow-light text-ws-yellow',
+    low: 'bg-ws-bg-alt text-ws-text-muted',
+  };
+  return (
+    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wide ${colors[severity]}`}>
+      {severity}
+    </span>
+  );
+}
 
 export default function CopilotDashboard() {
   const [view, setView] = useState<AppView>('landing');
   const [portfolioData, setPortfolioData] = useState<ParsedTrade[] | null>(null);
-  const [activeModule, setActiveModule] = useState<ModuleType | null>(null);
-  const [analysisResult, setAnalysisResult] = useState<AnalyzeResponse | null>(null);
+  const [portfolioSummary, setPortfolioSummary] = useState<PortfolioSummaryType | null>(null);
+  const [biases, setBiases] = useState<BehavioralBias[]>([]);
   const [showUpload, setShowUpload] = useState(false);
 
-  const handleDataUpload = useCallback(async (trades: ParsedTrade[]) => {
+  const handleDataUpload = useCallback((trades: ParsedTrade[]) => {
     setPortfolioData(trades);
+    const summary = analyzePortfolio(trades);
+    setPortfolioSummary(summary);
+    const detectedBiases = detectBiases(
+      trades,
+      summary.holdings,
+      summary.closedPositions,
+      summary.totalValue
+    );
+    setBiases(detectedBiases);
     setShowUpload(false);
-
-    // Run initial analysis
-    try {
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ trades }),
-      });
-
-      if (response.ok) {
-        const result: AnalyzeResponse = await response.json();
-        setAnalysisResult(result);
-      }
-    } catch (error) {
-      console.error('Analysis error:', error);
-    }
-
-    setView('chat');
-    if (!activeModule) {
-      setActiveModule('trading-coach');
-    }
-  }, [activeModule]);
-
-  const [pendingStarterMessage, setPendingStarterMessage] = useState<string | null>(null);
-
-  const MODULE_STARTERS: Record<string, string> = {
-    'trading-coach': 'Analyze my trading patterns and behavioral biases',
-    'tax-optimizer': 'Scan my portfolio for tax-loss harvesting opportunities',
-  };
-
-  const handleModuleClick = useCallback((module: ModuleType) => {
-    if (view === 'landing') {
-      setView('chat');
-    }
-    setShowUpload(false);
-    setActiveModule(module);
-  }, [view]);
-
-  const handleModuleChange = useCallback((module: ModuleType) => {
-    setActiveModule(module);
+    setView('app');
   }, []);
 
   const handleHomeClick = useCallback(() => {
     setView('landing');
-    setActiveModule(null);
     setShowUpload(false);
   }, []);
 
-  // Landing view
+  // ── Landing ────────────────────────────────────────────────────────────────
   if (view === 'landing') {
     return (
       <div className="min-h-screen bg-ws-bg flex flex-col">
-        <Header hasData={!!portfolioData} onUploadClick={() => setShowUpload(true)} onHomeClick={handleHomeClick} />
+        <Header
+          hasData={!!portfolioData}
+          onUploadClick={() => {
+            setView('app');
+            setShowUpload(true);
+          }}
+          onHomeClick={handleHomeClick}
+        />
 
         <main className="flex-1 flex flex-col items-center justify-center px-6 py-12">
           <div className="max-w-3xl w-full text-center mb-12">
@@ -89,15 +77,16 @@ export default function CopilotDashboard() {
               Your Financial Copilot
             </h1>
             <p className="text-lg text-ws-text-secondary max-w-xl mx-auto leading-relaxed">
-              Upload your Wealthsimple trade history and get personalized insights about your trading behavior, 
-              portfolio risks, and tax optimization opportunities.
+              Most AI financial tools answer questions. This one does something different — it stands
+              between you and your next bad trade.
             </p>
 
-            <div className="flex items-center justify-center gap-6 mt-8 mb-12">
+            <div className="flex items-center justify-center gap-6 mt-8 mb-12 flex-wrap">
               {[
-                'Behavioral Bias Detection',
-                'Pre-Trade Sanity Checks',
-                'Tax-Loss Harvesting',
+                'Portfolio Impact',
+                'Behavioral Risk',
+                "Devil's Advocate",
+                'Tax Consequences',
               ].map((feature) => (
                 <div key={feature} className="flex items-center gap-2">
                   <Sparkles className="w-3.5 h-3.5 text-ws-green" />
@@ -108,80 +97,87 @@ export default function CopilotDashboard() {
           </div>
 
           <CSVUpload onUploadComplete={handleDataUpload} />
-
-          <div className="mt-16 max-w-3xl w-full">
-            <h2 className="text-sm font-semibold text-ws-text-muted uppercase tracking-wider mb-6 text-center">
-              Available Modules
-            </h2>
-            <ModuleCards onModuleSelect={handleModuleClick} hasData={!!portfolioData} />
-          </div>
         </main>
       </div>
     );
   }
 
-  // Chat view (main app)
+  // ── App (upload modal) ─────────────────────────────────────────────────────
+  if (showUpload) {
+    return (
+      <div className="h-screen flex flex-col bg-ws-bg overflow-hidden">
+        <Header
+          hasData={!!portfolioData}
+          onUploadClick={() => setShowUpload(false)}
+          onHomeClick={handleHomeClick}
+        />
+        <main className="flex-1 flex items-center justify-center p-8">
+          <CSVUpload onUploadComplete={handleDataUpload} />
+        </main>
+      </div>
+    );
+  }
+
+  // ── App (main: sidebar + committee) ───────────────────────────────────────
   return (
     <div className="h-screen flex flex-col bg-ws-bg overflow-hidden">
       <Header
         hasData={!!portfolioData}
-        onUploadClick={() => setShowUpload(!showUpload)}
+        onUploadClick={() => setShowUpload(true)}
         onHomeClick={handleHomeClick}
       />
 
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar
-          activeModule={activeModule}
-          onModuleClick={handleModuleClick}
-          hasData={!!portfolioData}
-        />
+        {/* Left sidebar */}
+        <aside className="w-72 flex-shrink-0 border-r border-ws-border bg-white overflow-y-auto p-4 space-y-4">
+          {portfolioSummary ? (
+            <>
+              <PortfolioSummary summary={portfolioSummary} />
 
-        <main className="flex-1 flex overflow-hidden">
-          {/* Chat area */}
-          <div className="flex-1 flex flex-col overflow-hidden bg-ws-bg">
-            {showUpload ? (
-              <div className="flex-1 flex items-center justify-center p-8">
-                <CSVUpload onUploadComplete={handleDataUpload} />
-              </div>
-            ) : (
-              <ChatInterface
-                portfolioData={portfolioData}
-                activeModule={activeModule}
-                onModuleChange={handleModuleChange}
-                onDataUpload={handleDataUpload}
-                pendingStarterMessage={pendingStarterMessage}
-                onStarterMessageSent={() => setPendingStarterMessage(null)}
-              />
-            )}
-          </div>
-
-          {/* Right panel — module-specific dashboard */}
-          {analysisResult && !showUpload && (
-            <aside className="w-80 border-l border-ws-border bg-white overflow-y-auto p-4">
-              {activeModule === 'trading-coach' && (
-                <TradingDashboard
-                  summary={analysisResult.summary}
-                  biases={analysisResult.biases}
-                  insights={analysisResult.insights}
-                />
+              {/* Detected biases */}
+              {biases.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-ws-text-muted uppercase tracking-wider">
+                    Detected Biases
+                  </h3>
+                  {biases.map((bias) => (
+                    <div
+                      key={bias.name}
+                      className="bg-ws-bg border border-ws-border rounded-xl p-3 shadow-ws"
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <AlertTriangle className="w-3.5 h-3.5 text-ws-yellow flex-shrink-0" />
+                          <span className="text-xs font-semibold text-ws-text truncate">
+                            {bias.name}
+                          </span>
+                        </div>
+                        <SeverityBadge severity={bias.severity} />
+                      </div>
+                      <p className="text-xs text-ws-text-secondary leading-relaxed line-clamp-2">
+                        {bias.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               )}
-              
-              {activeModule === 'tax-optimizer' && analysisResult.taxSummary && analysisResult.taxOpportunities && (
-                <TaxDashboard
-                  taxSummary={analysisResult.taxSummary}
-                  harvestCandidates={analysisResult.taxOpportunities}
-                />
-              )}
-              
-              {!activeModule && (
-                <TradingDashboard
-                  summary={analysisResult.summary}
-                  biases={analysisResult.biases}
-                  insights={analysisResult.insights}
-                />
-              )}
-            </aside>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-center py-12">
+              <p className="text-sm text-ws-text-muted">No portfolio data loaded.</p>
+              <button
+                onClick={() => setShowUpload(true)}
+                className="mt-3 text-sm text-ws-green hover:underline"
+              >
+                Upload CSV or try demo →
+              </button>
+            </div>
           )}
+        </aside>
+
+        {/* Main: Committee */}
+        <main className="flex-1 flex flex-col overflow-hidden bg-ws-bg">
+          <CommitteeView portfolioData={portfolioData} />
         </main>
       </div>
     </div>

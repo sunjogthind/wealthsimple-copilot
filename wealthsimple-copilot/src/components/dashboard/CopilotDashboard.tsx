@@ -74,7 +74,7 @@ export default function CopilotDashboard() {
             </div>
 
             <h1 className="text-4xl font-serif text-ws-text mb-4 tracking-tight">
-              Your Pre-Trade Committee
+              Your Financial Copilot
             </h1>
             <p className="text-lg text-ws-text-secondary max-w-xl mx-auto leading-relaxed">
               Most AI financial tools answer questions. This one does something different — it stands

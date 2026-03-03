@@ -4,27 +4,33 @@
 
 ## What it does
 
-When you describe a trade you're considering, four specialized AI agents work in parallel — each taking real cognitive responsibility for a specific dimension of the decision. A fifth synthesis agent reads all four and produces a structured **Pre-Trade Brief**.
+When you describe a trade you're considering, a visible processing pipeline kicks off: portfolio analysis, behavioral bias detection, then four specialized AI agents deliberate in parallel — each taking real cognitive responsibility for a specific dimension of the decision. A fifth synthesis agent reads all four and produces a structured **Pre-Trade Brief**.
 
 This gives a retail investor the equivalent of a four-person research team on every trade decision. Zero cost.
 
 ```
 "I'm thinking about selling my LSPD.TO position"
                       │
+              ┌───────┴────────┐
+              ▼                ▼
+      Portfolio Analysis   Bias Detection
+       (40 trades)         (5 patterns)
+              │                │
+              └───────┬────────┘
+                      ▼
          ┌────────────┼────────────┐
          ▼            ▼            ▼            ▼
    Portfolio     Behavioral    Devil's       Tax Impact
     Impact         Risk        Advocate       Analyst
-   [streaming]  [streaming]  [streaming]   [streaming]
+   [collapsed]  [collapsed]  [collapsed]   [collapsed]
          │            │            │            │
          └────────────┴────────────┴────────────┘
                            │
                            ▼
                   Committee Synthesis
+              [auto-expands on complete]
                 🔴 HIGH RISK — LSPD.TO
          Primary concern: Loss Aversion pattern
-         You've held this position 298 days at -48%.
-         This AI cannot know your investment thesis...
                   THE DECISION IS YOURS.
 ```
 
@@ -86,7 +92,7 @@ The committee is a deliberation tool. It cannot know whether you've done additio
 |-------|-----------|-----|
 | Framework | Next.js 14 (App Router) | Streaming API routes, React server components |
 | AI | Anthropic `claude-sonnet-4-6` | Best reasoning quality for financial analysis |
-| Streaming | `@anthropic-ai/sdk` messages.stream | Parallel agent streaming, visible progress |
+| Streaming | `@anthropic-ai/sdk` messages.stream | Parallel agent streaming, live pipeline visualization |
 | Portfolio analysis | Pure TypeScript | No external API, runs on every request |
 | Styling | Tailwind CSS | Wealthsimple design system tokens |
 | CSV parsing | PapaParse | Handles malformed CSVs gracefully |
@@ -97,7 +103,7 @@ The committee is a deliberation tool. It cannot know whether you've done additio
 git clone <repo>
 cd wealthsimple-copilot
 npm install
-cp .env.local.example .env.local  # Add your ANTHROPIC_API_KEY
+cp .env.example .env.local  # Add your ANTHROPIC_API_KEY
 npm run dev
 ```
 
@@ -121,7 +127,8 @@ src/
 ├── components/
 │   ├── committee/
 │   │   ├── CommitteeView.tsx    ← parallel streaming orchestration
-│   │   ├── AgentCard.tsx        ← per-agent result card
+│   │   ├── AgentCard.tsx        ← collapsible agent result card
+│   │   ├── PipelineStrip.tsx    ← live processing pipeline visualization
 │   │   └── TradeInput.tsx       ← trade description input
 │   ├── dashboard/
 │   │   └── CopilotDashboard.tsx ← sidebar + committee layout

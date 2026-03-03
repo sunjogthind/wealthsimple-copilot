@@ -222,3 +222,81 @@
 .chat-markdown td {
   @apply p-2 border-b border-ws-border;
 }
+
+/* Agent card markdown — cleaner, tighter than chat */
+.agent-markdown h1,
+.agent-markdown h2,
+.agent-markdown h3 {
+  @apply font-semibold text-ws-text;
+}
+
+.agent-markdown h1 {
+  @apply text-base mt-0 mb-2 pb-1.5 border-b border-ws-border;
+}
+
+.agent-markdown h2 {
+  @apply text-sm mt-4 mb-1.5;
+}
+
+.agent-markdown h3 {
+  @apply text-sm mt-3 mb-1;
+}
+
+.agent-markdown p {
+  @apply mb-2.5 text-[13px] leading-[1.7] text-ws-text-secondary;
+}
+
+.agent-markdown ul, .agent-markdown ol {
+  @apply ml-4 mb-2.5 space-y-1.5;
+}
+
+.agent-markdown ul { @apply list-disc; }
+.agent-markdown ol { @apply list-decimal; }
+
+.agent-markdown li {
+  @apply text-[13px] leading-[1.65] text-ws-text-secondary;
+}
+
+.agent-markdown li::marker {
+  @apply text-ws-text-muted;
+}
+
+.agent-markdown strong {
+  @apply font-semibold text-ws-text;
+}
+
+.agent-markdown code {
+  @apply bg-ws-bg-alt px-1 py-0.5 rounded text-xs font-mono text-ws-text;
+}
+
+.agent-markdown pre {
+  @apply bg-ws-bg-alt p-3 rounded-lg my-2 overflow-x-auto;
+}
+
+.agent-markdown pre code {
+  @apply bg-transparent p-0;
+}
+
+.agent-markdown blockquote {
+  @apply border-l-2 border-ws-green/40 pl-3 my-2 text-[13px] text-ws-text-secondary;
+}
+
+.agent-markdown hr {
+  @apply border-ws-border my-3;
+}
+
+.agent-markdown table {
+  @apply w-full my-3 text-[13px] border border-ws-border rounded-lg overflow-hidden;
+}
+
+.agent-markdown th {
+  @apply text-left px-3 py-2 bg-ws-bg-alt border-b border-ws-border font-semibold text-ws-text text-xs;
+}
+
+.agent-markdown td {
+  @apply px-3 py-2 border-b border-ws-border;
+}
+
+.agent-markdown > *:last-child {
+  @apply mb-0;
+}

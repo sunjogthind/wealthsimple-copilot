@@ -54,8 +54,8 @@ export default function TradeInput({ onSubmit, isRunning, hasPortfolioData }: Tr
           What trade are you considering?
         </h2>
         <p className="text-ws-text-secondary text-sm leading-relaxed max-w-md mx-auto">
-          Describe your trade in plain English. Four specialized AI agents will analyze it in parallel —
-          behavioral risk, portfolio impact, tax consequences, and a devil&apos;s advocate.
+          Describe your trade in plain English. Four specialized AI agents will analyze it in parallel
+          (behavioral risk, portfolio impact, tax consequences, and a devil&apos;s advocate).
         </p>
       </div>
 

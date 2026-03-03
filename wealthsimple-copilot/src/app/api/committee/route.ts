@@ -8,7 +8,7 @@ import { BehavioralBias } from '@/types/portfolio';
 import { checkRateLimit } from '@/lib/utils/rate-limiter';
 import { formatCurrency, formatPercent } from '@/lib/utils/format';
 
-const MODEL = 'claude-haiku-4-5-20251001'; // swap to 'claude-sonnet-4-6' for production quality
+const MODEL = 'claude-sonnet-4-6';
 
 // ── Agent system prompts ─────────────────────────────────────────────────────
 

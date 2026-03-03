@@ -4,8 +4,11 @@ import { useState, useRef, useCallback } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { ParsedTrade } from '@/types/trade';
 import { AgentRole } from '@/types/committee';
+import { analyzePortfolio } from '@/lib/analysis/portfolio';
+import { detectBiases } from '@/lib/analysis/behaviors';
 import AgentCard from './AgentCard';
 import TradeInput from './TradeInput';
+import PipelineStrip, { PipelineStep } from './PipelineStrip';
 
 type CommitteeState = 'idle' | 'running' | 'complete';
 type AgentStatus = 'pending' | 'running' | 'complete' | 'error';
@@ -33,6 +36,8 @@ export default function CommitteeView({ portfolioData }: CommitteeViewProps) {
     tax: '',
     synthesis: '',
   });
+  const [pipelineStep, setPipelineStep] = useState<PipelineStep>('idle');
+  const [biasCount, setBiasCount] = useState(0);
 
   // Abort controllers so we can cancel inflight requests on reset
   const abortRefs = useRef<AbortController[]>([]);
@@ -130,6 +135,22 @@ export default function CommitteeView({ portfolioData }: CommitteeViewProps) {
       synthesis: '',
     });
 
+    // Pipeline step 1: Portfolio analysis
+    setPipelineStep('analyzing-portfolio');
+    await new Promise((r) => setTimeout(r, 400));
+
+    // Pipeline step 2: Bias detection
+    setPipelineStep('detecting-biases');
+    if (portfolioData && portfolioData.length > 0) {
+      const summary = analyzePortfolio(portfolioData);
+      const biases = detectBiases(portfolioData, summary.holdings, summary.closedPositions, summary.totalValue);
+      setBiasCount(biases.length);
+    }
+    await new Promise((r) => setTimeout(r, 400));
+
+    // Pipeline step 3: Launch agents
+    setPipelineStep('agents-running');
+
     // Create abort controllers for all 5 agents
     const controllers = Array.from({ length: 5 }, () => new AbortController());
     abortRefs.current = controllers;
@@ -142,6 +163,9 @@ export default function CommitteeView({ portfolioData }: CommitteeViewProps) {
       streamAgent('tax', trade, controllers[3]),
     ]);
 
+    // Pipeline step 4: Synthesis
+    setPipelineStep('synthesis-running');
+
     // Run synthesis with all 4 outputs
     await streamAgent('synthesis', trade, controllers[4], {
       portfolio: portfolioOut,
@@ -150,6 +174,7 @@ export default function CommitteeView({ portfolioData }: CommitteeViewProps) {
       tax: taxOut,
     });
 
+    setPipelineStep('complete');
     setState('complete');
   }, [portfolioData, appendAgentOutput, setAgentOutput]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -157,6 +182,8 @@ export default function CommitteeView({ portfolioData }: CommitteeViewProps) {
     abortRefs.current.forEach((c) => c.abort());
     abortRefs.current = [];
     setState('idle');
+    setPipelineStep('idle');
+    setBiasCount(0);
     setTradeDescription('');
     setAgentStatuses({
       portfolio: 'pending',
@@ -211,6 +238,18 @@ export default function CommitteeView({ portfolioData }: CommitteeViewProps) {
         </div>
       </div>
 
+      {/* Processing pipeline */}
+      <PipelineStrip
+        currentStep={pipelineStep}
+        tradeCount={portfolioData?.length ?? 0}
+        biasCount={biasCount}
+        agentsComplete={
+          (['portfolio', 'behavioral', 'devils-advocate', 'tax'] as AgentRole[]).filter(
+            (a) => agentStatuses[a] === 'complete'
+          ).length
+        }
+      />
+
       {/* 2×2 agent grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         {PANEL_AGENTS.map((agent) => (
@@ -219,6 +258,7 @@ export default function CommitteeView({ portfolioData }: CommitteeViewProps) {
             agent={agent}
             status={agentStatuses[agent]}
             content={agentOutputs[agent]}
+
           />
         ))}
       </div>

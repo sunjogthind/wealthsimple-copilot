@@ -185,9 +185,6 @@ export default function CSVUpload({ onUploadComplete, compact = false }: CSVUplo
           <FlaskConical className="w-4 h-4" />
           Try with sample portfolio — no CSV required
         </button>
-        <p className="text-xs text-ws-text-muted mt-2">
-          Fictional · Alex Chen · 40 trades across TFSA, RRSP &amp; Non-Reg
-        </p>
       </div>
     </div>
   );

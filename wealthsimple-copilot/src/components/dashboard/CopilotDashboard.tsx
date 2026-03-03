@@ -77,7 +77,7 @@ export default function CopilotDashboard() {
               Your Financial Copilot
             </h1>
             <p className="text-lg text-ws-text-secondary max-w-xl mx-auto leading-relaxed">
-              Most AI financial tools answer questions. This one does something different — it stands
+              Most AI financial tools answer questions. This one does something different, it stands
               between you and your next bad trade.
             </p>
 
